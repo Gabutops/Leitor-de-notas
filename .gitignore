@@ -139,6 +139,7 @@ venv.bak/
 # mkdocs documentation
 /site
 Resultados/
+Pasta de pesquisa/
 # mypy
 .mypy_cache/
 .dmypy.json
