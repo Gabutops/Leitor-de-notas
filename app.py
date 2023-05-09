@@ -14,14 +14,17 @@ def extrair_texto_pagina(pagina):
     return texto
 def open_pdf(files):
     BUGS = []
+    # Cria o DataFrame para receber os dados
     df = pd.DataFrame(columns=["Numero_Nota", "Valor_Total"])
+    # Para cada arquivo, extrai o .pdf e faz o processo de leitura
     for file in files:
         leitor = PyPDF2.PdfReader(f"Pasta de pesquisa/{file}")
         total_paginas = len(leitor.pages)
-        # para cada página, extrair o texto e encontrar o valor total
+        # Para cada página, extrai o texto e encontra o valor total
         for num_pagina in range(total_paginas):
             pagina = leitor.pages[num_pagina]
             texto_pagina = extrair_texto_pagina(pagina)
+            # Regex do numero da nota
             regex_numero = r"\d{3}\.\d{3}\.\d{3}"
             resultado_nota = re.search(regex_numero, texto_pagina)
             numero_nota =resultado_nota.group(0)
@@ -35,44 +38,45 @@ def open_pdf(files):
                     if valores[-1] == 0:
                         valores.pop(-1)
                     valor_monetario = valores[-1]
-                    # adicionar os dados ao DataFrame
+                    # Adiciona os dados ao DataFrame
                     dados = {"Numero_Nota": [numero_nota], "Valor_Total": [valor_monetario]}
                     new_df = pd.DataFrame(dados)
                     df = pd.concat([df, new_df])
-                    print(f"2a inst- File:{file} | Nr. Nota: {numero_nota} | Vlr. Nota: {valor_monetario}")
+                    print(f"File:{file} | Nr. Nota:  | Vlr. Nota: {valor_monetario}")
                 
             else:
                 parte_valores = re.search(r'VALOR DO FRETE.*?CÁLCULO DO IMPOSTO', texto_pagina, re.DOTALL).group(0)
 
-                # extrair os valores em uma lista
+                # Extrair os valores em uma lista
                 valores = re.findall(r'\d+,\d+', parte_valores)
-                # converter os valores para float
+                # Converter os valores para float
                 valores = [float(valor.replace(',', '.')) for valor in valores]
                 valores.pop(-1)
                 valor_monetario = valores[-1]
-                # adicionar os dados ao DataFrame
+                # Adiciona os dados ao DataFrame
                 dados = {"Numero_Nota": [numero_nota], "Valor_Total": [valor_monetario]}
                 new_df = pd.DataFrame(dados)
                 df = pd.concat([df, new_df])
-                print(f"3a inst- File:{file} | Nr. Nota: {numero_nota} | Vlr. Nota: {valor_monetario}")
+                print(f"File:{file} | Nr. Nota:  | Vlr. Nota: {valor_monetario}")
             
             with open("log.txt",mode="w") as l:
                 l.write(f"{date_str} -> {BUGS}")
     df.to_csv(f'Resultados/{date_str}.csv',sep=";", index=False)
     
 def processar_dados():
+    # Cria um input para receber os .pdf's
     files = file_upload("Selecione as notas:", accept="application/pdf", multiple=True)
+    # Lista de pdf's
     pdfs = []
+    #para cada arquivo recebido, armazena o arquivo na lista pdfs
     for pdf in files:
         pdfs.append(pdf['filename'])
     open_pdf(pdfs)
-    def open_file(path):
-        webbrowser.open(path)
-    toast(f'Arquivo CSV salvo cocm sucesso em Resultados/{date_str}.csv!\nClique aqui para conferir o arquivo',duration= 25,onclick=lambda: open_file(f'{os.path.abspath(".")}Resultados/{date_str}.csv'))
-
+    toast(f'Arquivo CSV salvo com sucesso em Resultados/{date_str}.csv!',duration= 25)
+    
 if __name__ == "__main__":
     from datetime import date
     global date_str,df
     today = date.today()
     date_str = today.strftime("%d-%m-%Y")
-    start_server(applications=processar_dados,host="0.0.0.0")
+    start_server(applications=processar_dados,host="0.0.0.0",port=7000)
