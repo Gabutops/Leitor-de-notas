@@ -42,7 +42,7 @@ def open_pdf(files):
                     dados = {"Numero_Nota": [numero_nota], "Valor_Total": [valor_monetario]}
                     new_df = pd.DataFrame(dados)
                     df = pd.concat([df, new_df])
-                    print(f"File:{file} | Nr. Nota:  | Vlr. Nota: {valor_monetario}")
+                    print(f"File:{file} | Nr. Nota: {numero_nota} | Vlr. Nota: {valor_monetario}")
                 
             else:
                 parte_valores = re.search(r'VALOR DO FRETE.*?CÁLCULO DO IMPOSTO', texto_pagina, re.DOTALL).group(0)
@@ -57,7 +57,7 @@ def open_pdf(files):
                 dados = {"Numero_Nota": [numero_nota], "Valor_Total": [valor_monetario]}
                 new_df = pd.DataFrame(dados)
                 df = pd.concat([df, new_df])
-                print(f"File:{file} | Nr. Nota:  | Vlr. Nota: {valor_monetario}")
+                print(f"File:{file} | Nr. Nota: {numero_nota} | Vlr. Nota: {valor_monetario}")
             
             with open("log.txt",mode="w") as l:
                 l.write(f"{date_str} -> {BUGS}")
